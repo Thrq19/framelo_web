@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Framelo Booth</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+        body { font-family: 'Space Mono', monospace; background: #f0f0f0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; text-align: center; }
+        .card { background: white; padding: 20px; border: 3px solid black; box-shadow: 8px 8px 0px #000; max-width: 400px; width: 100%; }
+        h1 { border-bottom: 3px solid black; padding-bottom: 10px; margin-top: 0; }
+        img { max-width: 100%; border: 2px solid black; margin: 20px auto; display: none; box-shadow: 4px 4px 0px #eee;}
+        .btn { display: block; background: white; color: black; padding: 12px; margin-bottom: 10px; border: 2px solid black; text-decoration: none; font-weight: bold; text-transform: uppercase; cursor: pointer; }
+        .btn:hover { background: black; color: white; transform: translate(-2px, -2px); box-shadow: 4px 4px 0px #ccc; }
+        #status { font-weight: bold; color: #555; margin: 20px 0; }
+        #buttons { display: none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Framelo Booth</h1>
+        <p id="status">Mengambil data...</p>
+        <img id="preview" alt="Foto">
+        <div id="buttons">
+            <a id="btn-pic" class="btn" download>🖼️ Download Foto</a>
+            <a id="btn-gif" class="btn" download style="display:none">✨ Download GIF</a>
+            <a id="btn-vid" class="btn" download style="display:none">📹 Download Video</a>
+            <a id="btn-zip" class="btn" download style="display:none">💾 Download ZIP (Raw)</a>
+        </div>
+        <p style="font-size: 10px; color: #888; margin-top: 20px;">Files dihapus dalam 30 hari.</p>
+    </div>
+
+    <script>
+        // Frontend sekarang cuma ngomong sama Backend Vercel sendiri
+        const params = new URLSearchParams(window.location.search);
+        const sessionId = params.get('id');
+
+        const statusEl = document.getElementById('status');
+        const imgEl = document.getElementById('preview');
+        const btns = document.getElementById('buttons');
+
+        async function loadData() {
+            if (!sessionId) {
+                statusEl.innerText = "⚠️ Scan QR Code ulang.";
+                return;
+            }
+
+            // PANGGIL BACKEND VERCEL
+            try {
+                const response = await fetch(`/api/get?id=${sessionId}`);
+                const data = await response.json();
+
+                if (!response.ok) throw new Error("Data tidak ditemukan");
+
+                // Pasang Link
+                if (data.photo_url) {
+                    imgEl.src = data.photo_url;
+                    document.getElementById('btn-pic').href = data.photo_url;
+                    imgEl.onload = () => {
+                        statusEl.style.display = 'none';
+                        imgEl.style.display = 'block';
+                        btns.style.display = 'block';
+                    }
+                }
+                if (data.gif_url) {
+                    const b = document.getElementById('btn-gif');
+                    b.href = data.gif_url; b.style.display = 'block';
+                }
+                if (data.video_url) {
+                    const b = document.getElementById('btn-vid');
+                    b.href = data.video_url; b.style.display = 'block';
+                }
+                if (data.zip_url) {
+                    const b = document.getElementById('btn-zip');
+                    b.href = data.zip_url; b.style.display = 'block';
+                }
+            } catch (err) {
+                statusEl.innerText = "❌ Error: " + err.message;
+            }
+        }
+        loadData();
+    </script>
+</body>
+</html>
