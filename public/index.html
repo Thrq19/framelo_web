@@ -9,9 +9,20 @@
         body { font-family: 'Space Mono', monospace; background: #f0f0f0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; text-align: center; }
         .card { background: white; padding: 20px; border: 3px solid black; box-shadow: 8px 8px 0px #000; max-width: 400px; width: 100%; }
         h1 { border-bottom: 3px solid black; padding-bottom: 10px; margin-top: 0; }
-        img { max-width: 100%; border: 2px solid black; margin: 20px auto; display: none; box-shadow: 4px 4px 0px #eee;}
+        
+        /* Foto Utama */
+        img.main-preview { max-width: 100%; border: 2px solid black; margin: 20px auto; display: none; box-shadow: 4px 4px 0px #eee;}
+        
         .btn { display: block; background: white; color: black; padding: 12px; margin-bottom: 10px; border: 2px solid black; text-decoration: none; font-weight: bold; text-transform: uppercase; cursor: pointer; }
         .btn:hover { background: black; color: white; transform: translate(-2px, -2px); box-shadow: 4px 4px 0px #ccc; }
+        
+        /* Section Original Photos */
+        .originals-title { margin-top: 30px; border-top: 2px dashed #ccc; padding-top: 20px; font-weight: bold; display: none; }
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .grid-item { border: 2px solid #000; }
+        .grid-item img { width: 100%; height: auto; display: block; border-bottom: 2px solid #000; }
+        .btn-small { font-size: 10px; padding: 5px; width: 100%; border: none; background: black; color: white; text-align: center; display: block; text-decoration: none;}
+
         #status { font-weight: bold; color: #555; margin: 20px 0; }
         #buttons { display: none; }
     </style>
@@ -20,39 +31,40 @@
     <div class="card">
         <h1>Framelo Booth</h1>
         <p id="status">Mengambil data...</p>
-        <img id="preview" alt="Foto">
+        
+        <img id="preview" class="main-preview" alt="Foto">
+        
         <div id="buttons">
-            <a id="btn-pic" class="btn" download>🖼️ Download Foto</a>
+            <a id="btn-pic" class="btn" download>🖼️ Download Frame</a>
             <a id="btn-gif" class="btn" download style="display:none">✨ Download GIF</a>
             <a id="btn-vid" class="btn" download style="display:none">📹 Download Video</a>
-            <a id="btn-zip" class="btn" download style="display:none">💾 Download ZIP (Raw)</a>
         </div>
+
+        <div id="originals-section" style="display:none;">
+            <div class="originals-title">ORIGINAL PHOTOS</div>
+            <div class="grid-container" id="originals-grid">
+                </div>
+        </div>
+
         <p style="font-size: 10px; color: #888; margin-top: 20px;">Files dihapus dalam 30 hari.</p>
     </div>
 
     <script>
-        // Frontend sekarang cuma ngomong sama Backend Vercel sendiri
         const params = new URLSearchParams(window.location.search);
         const sessionId = params.get('id');
-
         const statusEl = document.getElementById('status');
         const imgEl = document.getElementById('preview');
         const btns = document.getElementById('buttons');
 
         async function loadData() {
-            if (!sessionId) {
-                statusEl.innerText = "⚠️ Scan QR Code ulang.";
-                return;
-            }
+            if (!sessionId) { statusEl.innerText = "⚠️ Scan QR Code ulang."; return; }
 
-            // PANGGIL BACKEND VERCEL
             try {
                 const response = await fetch(`/api/get?id=${sessionId}`);
                 const data = await response.json();
-
                 if (!response.ok) throw new Error("Data tidak ditemukan");
 
-                // Pasang Link
+                // 1. Tampilkan Foto Frame Utama
                 if (data.photo_url) {
                     imgEl.src = data.photo_url;
                     document.getElementById('btn-pic').href = data.photo_url;
@@ -63,20 +75,30 @@
                     }
                 }
                 if (data.gif_url) {
-                    const b = document.getElementById('btn-gif');
-                    b.href = data.gif_url; b.style.display = 'block';
+                    const b = document.getElementById('btn-gif'); b.href = data.gif_url; b.style.display = 'block';
                 }
                 if (data.video_url) {
-                    const b = document.getElementById('btn-vid');
-                    b.href = data.video_url; b.style.display = 'block';
+                    const b = document.getElementById('btn-vid'); b.href = data.video_url; b.style.display = 'block';
                 }
-                if (data.zip_url) {
-                    const b = document.getElementById('btn-zip');
-                    b.href = data.zip_url; b.style.display = 'block';
+
+                // 2. Tampilkan Original Photos (LOOPING)
+                if (data.original_urls && Array.isArray(data.original_urls)) {
+                    document.getElementById('originals-section').style.display = 'block';
+                    const grid = document.getElementById('originals-grid');
+                    
+                    data.original_urls.forEach((url, index) => {
+                        // Bikin kotak HTML buat setiap foto
+                        const item = document.createElement('div');
+                        item.className = 'grid-item';
+                        item.innerHTML = `
+                            <img src="${url}" loading="lazy">
+                            <a href="${url}" class="btn-small" download>SAVE #${index+1}</a>
+                        `;
+                        grid.appendChild(item);
+                    });
                 }
-            } catch (err) {
-                statusEl.innerText = "❌ Error: " + err.message;
-            }
+
+            } catch (err) { statusEl.innerText = "❌ Error: " + err.message; }
         }
         loadData();
     </script>
