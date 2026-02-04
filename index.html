@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Framelo Booth - Download</title>
     <style>
-        /* Import Font Keren kayak struk belanja */
         @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
-        
+
         body {
             font-family: 'Space Mono', monospace;
-            background-color: #f0f0f0; /* Latar abu terang */
+            background-color: #f0f0f0;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -23,8 +22,8 @@
         .card {
             background: white;
             padding: 20px;
-            border: 3px solid black; /* Garis tebal */
-            box-shadow: 10px 10px 0px 0px #000; /* Bayangan kotak kasar */
+            border: 3px solid black;
+            box-shadow: 10px 10px 0px 0px #000;
             max-width: 400px;
             width: 100%;
             text-align: center;
@@ -38,43 +37,47 @@
             font-weight: 900;
         }
 
-        #status {
-            color: #666;
-            margin: 20px 0;
-            font-style: italic;
-            font-weight: bold;
-        }
+        #status { color: #666; margin: 20px 0; font-weight: bold; }
 
-        /* --- BAGIAN YANG DIUBAH --- */
         img {
             max-width: 100%;
             border: 2px solid black;
-            display: none; 
-            /* transform: rotate(-2deg);  <-- BARIS INI YANG BIKIN MIRING TADI, SAYA HAPUS */
+            display: none;
             margin: 20px auto;
             box-shadow: 5px 5px 0px #eee;
         }
-        /* -------------------------- */
+
+        /* --- STYLE TOMBOL BARU --- */
+        .btn-container { display: none; margin-top: 20px; }
 
         .btn {
             display: block;
-            background: black;
-            color: white;
+            background: white;
+            color: black;
             padding: 15px;
             text-decoration: none;
             font-weight: bold;
-            margin-top: 10px;
+            margin-bottom: 10px;
             text-transform: uppercase;
             border: 2px solid black;
             transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
         }
 
         .btn:hover {
-            background: #fff;
-            color: #000;
-            box-shadow: 5px 5px 0px 0px #000;
-            transform: translateY(-2px);
+            background: #000;
+            color: #fff;
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0px 0px #ccc;
         }
+
+        /* Ikon kecil di tombol */
+        .btn::before { content: '📁'; margin-right: 10px; }
+        .btn-pic::before { content: '🖼️'; }
+        .btn-gif::before { content: '✨'; }
+        .btn-vid::before { content: '📹'; }
+        .btn-raw::before { content: '💾'; }
 
         .footer {
             margin-top: 30px;
@@ -89,54 +92,74 @@
 
     <div class="card">
         <h1>Framelo Booth</h1>
-        
-        <p id="status">Sedang memuat foto...</p>
+        <p id="status">Mengambil data...</p>
         
         <img id="preview" src="" alt="Foto Kamu">
 
-        <div id="buttons" style="display: none;">
-            <a id="btn-download" href="#" class="btn" download>Download Foto ⇩</a>
+        <div class="btn-container" id="buttons">
+            <a id="btn-pic" href="#" class="btn btn-pic" download>Download Picture</a>
+            
+            <a id="btn-gif" href="#" class="btn btn-gif" download style="display:none">Download GIF</a>
+
+            <a id="btn-vid" href="#" class="btn btn-vid" download style="display:none">Download Video</a>
+
+            <a id="btn-raw" href="#" class="btn btn-raw" download style="display:none">Original Photos (ZIP)</a>
         </div>
 
         <div class="footer">
-            Made with ❤️ by Framelo Team.<br>
-            File dihapus otomatis dalam 30 hari.
+            File dihapus otomatis dalam 30 hari.<br>
+            Framelo Booth © 2026
         </div>
     </div>
 
     <script>
-        // Ambil link foto dari parameter URL ?foto=...
         const params = new URLSearchParams(window.location.search);
-        const imageUrl = params.get('foto');
+        
+        // Ambil semua parameter
+        const photoUrl = params.get('foto');
+        const gifUrl = params.get('gif');
+        const videoUrl = params.get('video');
+        const zipUrl = params.get('zip'); // Untuk original files
 
         const statusEl = document.getElementById('status');
         const imgEl = document.getElementById('preview');
         const btnGroup = document.getElementById('buttons');
-        const downloadBtn = document.getElementById('btn-download');
 
-        if (imageUrl) {
-            // Set sumber gambar
-            imgEl.src = imageUrl;
-            downloadBtn.href = imageUrl;
+        if (photoUrl) {
+            // Setup Foto Utama
+            imgEl.src = photoUrl;
+            document.getElementById('btn-pic').href = photoUrl;
 
-            // Saat gambar sukses dimuat oleh browser
             imgEl.onload = () => {
-                statusEl.style.display = 'none'; // Sembunyikan tulisan loading
-                imgEl.style.display = 'block';   // Munculkan gambar
-                btnGroup.style.display = 'block'; // Munculkan tombol
+                statusEl.style.display = 'none';
+                imgEl.style.display = 'block';
+                btnGroup.style.display = 'block';
             };
 
-            // Jika gambar gagal dimuat (misal link salah/expired)
-            imgEl.onerror = () => {
-                statusEl.innerHTML = "❌ Ups! Foto tidak ditemukan.<br>Mungkin link sudah kadaluarsa.";
-                statusEl.style.color = "red";
-                imgEl.style.display = 'none';
-            };
+            // Setup Tombol GIF
+            if (gifUrl && gifUrl !== "None") {
+                const btnGif = document.getElementById('btn-gif');
+                btnGif.href = gifUrl;
+                btnGif.style.display = 'block';
+            }
+
+            // Setup Tombol VIDEO
+            if (videoUrl && videoUrl !== "None") {
+                const btnVid = document.getElementById('btn-vid');
+                btnVid.href = videoUrl;
+                btnVid.style.display = 'block';
+            }
+
+            // Setup Tombol ORIGINAL (ZIP)
+            if (zipUrl && zipUrl !== "None") {
+                const btnRaw = document.getElementById('btn-raw');
+                btnRaw.href = zipUrl;
+                btnRaw.style.display = 'block';
+            }
+
         } else {
-            // Jika dibuka tanpa parameter ?foto=
-            statusEl.innerHTML = "⚠️ Silakan scan QR Code dari Photobooth.";
+            statusEl.innerHTML = "⚠️ Silakan scan QR Code lagi.";
         }
     </script>
-
 </body>
 </html>
