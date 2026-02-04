@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Framelo Booth - Download</title>
+    <style>
+        /* Import Font Keren kayak struk belanja */
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: #f0f0f0; /* Latar abu terang */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify_content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border: 3px solid black; /* Garis tebal */
+            box-shadow: 10px 10px 0px 0px #000; /* Bayangan kotak kasar */
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+            border-bottom: 3px solid black;
+            padding-bottom: 10px;
+            font-weight: 900;
+        }
+
+        #status {
+            color: #666;
+            margin: 20px 0;
+            font-style: italic;
+            font-weight: bold;
+        }
+
+        /* --- BAGIAN YANG DIUBAH --- */
+        img {
+            max-width: 100%;
+            border: 2px solid black;
+            display: none; 
+            /* transform: rotate(-2deg);  <-- BARIS INI YANG BIKIN MIRING TADI, SAYA HAPUS */
+            margin: 20px auto;
+            box-shadow: 5px 5px 0px #eee;
+        }
+        /* -------------------------- */
+
+        .btn {
+            display: block;
+            background: black;
+            color: white;
+            padding: 15px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 10px;
+            text-transform: uppercase;
+            border: 2px solid black;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #fff;
+            color: #000;
+            box-shadow: 5px 5px 0px 0px #000;
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 10px;
+            color: #888;
+            border-top: 1px dashed #ccc;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>Framelo Booth</h1>
+        
+        <p id="status">Sedang memuat foto...</p>
+        
+        <img id="preview" src="" alt="Foto Kamu">
+
+        <div id="buttons" style="display: none;">
+            <a id="btn-download" href="#" class="btn" download>Download Foto ⇩</a>
+        </div>
+
+        <div class="footer">
+            Made with ❤️ by Framelo Team.<br>
+            File dihapus otomatis dalam 30 hari.
+        </div>
+    </div>
+
+    <script>
+        // Ambil link foto dari parameter URL ?foto=...
+        const params = new URLSearchParams(window.location.search);
+        const imageUrl = params.get('foto');
+
+        const statusEl = document.getElementById('status');
+        const imgEl = document.getElementById('preview');
+        const btnGroup = document.getElementById('buttons');
+        const downloadBtn = document.getElementById('btn-download');
+
+        if (imageUrl) {
+            // Set sumber gambar
+            imgEl.src = imageUrl;
+            downloadBtn.href = imageUrl;
+
+            // Saat gambar sukses dimuat oleh browser
+            imgEl.onload = () => {
+                statusEl.style.display = 'none'; // Sembunyikan tulisan loading
+                imgEl.style.display = 'block';   // Munculkan gambar
+                btnGroup.style.display = 'block'; // Munculkan tombol
+            };
+
+            // Jika gambar gagal dimuat (misal link salah/expired)
+            imgEl.onerror = () => {
+                statusEl.innerHTML = "❌ Ups! Foto tidak ditemukan.<br>Mungkin link sudah kadaluarsa.";
+                statusEl.style.color = "red";
+                imgEl.style.display = 'none';
+            };
+        } else {
+            // Jika dibuka tanpa parameter ?foto=
+            statusEl.innerHTML = "⚠️ Silakan scan QR Code dari Photobooth.";
+        }
+    </script>
+
+</body>
+</html>""
