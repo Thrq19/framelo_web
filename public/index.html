@@ -25,6 +25,7 @@
             text-align: center;
         }
 
+        /* --- LOGO --- */
         .logo-text {
             font-family: 'Fredoka', sans-serif;
             font-size: 42px;
@@ -42,6 +43,7 @@
             letter-spacing: 2px;
         }
 
+        /* --- TOMBOL MENU --- */
         .btn {
             display: block;
             background: white;
@@ -57,14 +59,9 @@
             cursor: pointer;
             transition: all 0.1s;
             border-radius: 8px;
-            width: 100%; /* Pastikan tombol lebar */
-            box-sizing: border-box; /* Biar padding ga ngerusak lebar */
+            width: 100%;
         }
-
-        .btn:active {
-            transform: translate(2px, 2px);
-            box-shadow: 3px 3px 0px 0px #000;
-        }
+        .btn:active { transform: translate(2px, 2px); box-shadow: 3px 3px 0px 0px #000; }
 
         .footer {
             margin-top: 40px;
@@ -74,85 +71,95 @@
             line-height: 1.5;
         }
 
-        /* --- MODAL --- */
+        /* --- HALAMAN PREVIEW (HIDDEN BY DEFAULT) --- */
+        #preview-section {
+            display: none; /* Sembunyi dulu */
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .back-btn {
+            align-self: flex-start;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .preview-card {
+            border: 2px solid black;
+            padding: 10px;
+            background: white;
+            box-shadow: 8px 8px 0px #eee;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        /* Media di dalam preview */
+        .preview-media {
+            width: 100%;
+            display: block;
+            border: 1px solid #ccc;
+            cursor: pointer; /* Biar user tau bisa diklik */
+        }
+
+        .instruction {
+            margin-top: 15px;
+            font-size: 12px;
+            color: #555;
+            font-weight: bold;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-5px);}
+            60% {transform: translateY(-3px);}
+        }
+
+        /* --- MODAL ORIGINAL (GRID) --- */
         .modal {
             display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 999;
-            align-items: center;
-            justify-content: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 999;
+            align-items: center; justify-content: center;
         }
-        
         .modal-content {
-            background: white;
-            padding: 20px;
-            width: 90%;
-            max-width: 400px;
-            max-height: 80vh;
-            overflow-y: auto;
-            border-radius: 10px;
-            text-align: center;
+            background: white; padding: 20px; width: 90%; max-width: 400px;
+            max-height: 80vh; overflow-y: auto; border-radius: 10px;
             position: relative;
         }
-
         .close-btn {
-            position: absolute;
-            top: 10px; right: 15px;
-            font-size: 24px;
-            font-weight: bold;
+            position: absolute; top: 10px; right: 15px; font-size: 24px;
             cursor: pointer;
-            color: #aaa;
         }
-
         .grid-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 15px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;
         }
+        .grid-item img { width: 100%; border-radius: 5px; border: 1px solid #ccc; cursor: pointer;}
         
-        .grid-item img {
-            width: 100%;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-        
-        .btn-download-small {
-            display: block;
-            background: black;
-            color: white;
-            font-size: 10px;
-            padding: 8px;
-            text-decoration: none;
-            margin-top: 5px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
         #loading { font-size: 14px; color: #666; animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0.5; } }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <div class="container" id="main-menu">
         <div class="logo-text">Framelo<br>Booth</div>
         <div class="logo-sub">CAPTURE MOMENTS</div>
 
         <div id="loading">Memuat data...</div>
 
         <div id="menu-buttons" style="display: none;">
-            
             <button id="btn-pic" class="btn">Picture</button>
-
-            <button id="btn-raw-trigger" class="btn" onclick="openOriginals()">Original Image</button>
-
+            <button id="btn-raw-trigger" class="btn" onclick="openOriginalsGrid()">Original Image</button>
             <button id="btn-gif" class="btn" style="display:none">GIF</button>
-
             <button id="btn-vid" class="btn" style="display:none">Video</button>
-        
         </div>
 
         <div class="footer">
@@ -160,10 +167,20 @@
         </div>
     </div>
 
+    <div id="preview-section">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        
+        <div class="preview-card">
+            <div id="media-container">
+                </div>
+            <div class="instruction">👆 TAP IMAGE TO SAVE</div>
+        </div>
+    </div>
+
     <div id="modal-originals" class="modal">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeOriginals()">&times;</span>
-            <h3>Original Photos</h3>
+            <span class="close-btn" onclick="closeOriginalsGrid()">&times;</span>
+            <h3>Select to Preview</h3>
             <div id="originals-grid" class="grid-container"></div>
         </div>
     </div>
@@ -173,122 +190,138 @@
         const sessionId = params.get('id');
 
         const loadingEl = document.getElementById('loading');
-        const menuEl = document.getElementById('menu-buttons');
+        const mainMenuEl = document.getElementById('main-menu');
+        const menuButtonsEl = document.getElementById('menu-buttons');
+        const previewSectionEl = document.getElementById('preview-section');
+        const mediaContainerEl = document.getElementById('media-container');
 
-        // --- FUNGSI AUTO DOWNLOAD (The Magic) ---
-        async function forceDownload(url, filename, btnElement) {
-            const originalText = btnElement.innerText;
+        // --- FUNGSI DOWNLOAD OTOMATIS ---
+        async function forceDownload(url, filename, elementToFeedback) {
+            const originalOpacity = elementToFeedback.style.opacity;
+            elementToFeedback.style.opacity = "0.5"; // Efek visual lagi loading
             
-            // Ubah tulisan tombol jadi loading
-            btnElement.innerText = "⏳ Downloading...";
-            btnElement.style.pointerEvents = "none"; // Cegah klik ganda
-
             try {
-                // 1. Fetch file data
                 const response = await fetch(url);
-                if (!response.ok) throw new Error("Network error");
-                
-                // 2. Buat Blob (File Virtual)
                 const blob = await response.blob();
                 const blobUrl = window.URL.createObjectURL(blob);
-
-                // 3. Buat link palsu & klik otomatis
                 const a = document.createElement('a');
                 a.href = blobUrl;
                 a.download = filename;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-
-                // 4. Bersihkan
                 window.URL.revokeObjectURL(blobUrl);
             } catch (e) {
-                // Fallback kalau fetch gagal (misal CORS error), buka tab baru
-                alert("Download otomatis gagal, membuka di tab baru...");
                 window.open(url, '_blank');
             } finally {
-                // Balikin tombol seperti semula
-                btnElement.innerText = originalText;
-                btnElement.style.pointerEvents = "auto";
+                elementToFeedback.style.opacity = "1"; // Balikin normal
+                alert("Downloading started...");
             }
         }
 
-        async function loadData() {
-            if (!sessionId) { 
-                loadingEl.innerText = "⚠️ Silakan scan QR Code lagi.";
-                return; 
+        // --- FUNGSI NAVIGASI: BUKA PREVIEW ---
+        function showPreview(url, type, filenameBase) {
+            // 1. Sembunyikan Menu Utama & Modal Grid
+            mainMenuEl.style.display = 'none';
+            document.getElementById('modal-originals').style.display = 'none';
+            
+            // 2. Bersihkan container lama
+            mediaContainerEl.innerHTML = '';
+
+            // 3. Buat Elemen Baru (Gambar atau Video)
+            let mediaElement;
+
+            if (type === 'video') {
+                mediaElement = document.createElement('video');
+                mediaElement.src = url;
+                mediaElement.autoplay = true;
+                mediaElement.loop = true;
+                mediaElement.muted = true; // Wajib muted biar autoplay jalan di HP
+                mediaElement.playsInline = true;
+                mediaElement.className = 'preview-media';
+            } else {
+                mediaElement = document.createElement('img');
+                mediaElement.src = url;
+                mediaElement.className = 'preview-media';
             }
+
+            // 4. PASANG EVENT: KLIK MEDIA -> DOWNLOAD
+            mediaElement.onclick = () => {
+                const ext = type === 'video' ? 'mp4' : (type === 'gif' ? 'gif' : 'jpg');
+                forceDownload(url, `${filenameBase}.${ext}`, mediaElement);
+            };
+
+            mediaContainerEl.appendChild(mediaElement);
+
+            // 5. Tampilkan Halaman Preview
+            previewSectionEl.style.display = 'flex';
+        }
+
+        // --- FUNGSI NAVIGASI: KEMBALI KE MENU ---
+        function goBack() {
+            previewSectionEl.style.display = 'none';
+            mainMenuEl.style.display = 'block';
+            mediaContainerEl.innerHTML = ''; // Stop video/clear memori
+        }
+
+        // --- DATA LOADING ---
+        async function loadData() {
+            if (!sessionId) { loadingEl.innerText = "⚠️ Error QR Code."; return; }
 
             try {
                 const response = await fetch(`/api/get?id=${sessionId}`);
                 const data = await response.json();
-                if (!response.ok) throw new Error("Data expired.");
+                if (!response.ok) throw new Error("Data not found");
 
-                // SETUP TOMBOL 1: PICTURE
+                // BUTTON 1: PICTURE
                 if (data.photo_url) {
-                    const btn = document.getElementById('btn-pic');
-                    btn.onclick = () => forceDownload(data.photo_url, `Framelo_${sessionId}.jpg`, btn);
+                    document.getElementById('btn-pic').onclick = () => 
+                        showPreview(data.photo_url, 'image', `Framelo_Pic_${sessionId}`);
                 }
 
-                // SETUP TOMBOL 2: GIF
+                // BUTTON 2: GIF
                 if (data.gif_url) {
                     const btn = document.getElementById('btn-gif');
                     btn.style.display = 'block';
-                    btn.onclick = () => forceDownload(data.gif_url, `Framelo_${sessionId}.gif`, btn);
+                    btn.onclick = () => showPreview(data.gif_url, 'gif', `Framelo_Gif_${sessionId}`);
                 }
 
-                // SETUP TOMBOL 3: VIDEO
+                // BUTTON 3: VIDEO
                 if (data.video_url) {
                     const btn = document.getElementById('btn-vid');
                     btn.style.display = 'block';
-                    btn.onclick = () => forceDownload(data.video_url, `Framelo_${sessionId}.mp4`, btn);
+                    btn.onclick = () => showPreview(data.video_url, 'video', `Framelo_Video_${sessionId}`);
                 }
 
-                // SETUP MODAL: ORIGINAL PHOTOS
+                // BUTTON 4: ORIGINAL (GRID)
                 if (data.original_urls && Array.isArray(data.original_urls)) {
                     const grid = document.getElementById('originals-grid');
                     data.original_urls.forEach((url, index) => {
-                        const div = document.createElement('div');
-                        div.className = 'grid-item';
-                        
-                        // Gambar Preview
                         const img = document.createElement('img');
                         img.src = url;
-                        img.loading = "lazy";
-
-                        // Tombol Save Kecil
-                        const btn = document.createElement('button'); // Ubah jadi <button>
-                        btn.className = 'btn-download-small';
-                        btn.innerText = `Save #${index+1}`;
-                        // Pasang fungsi download
-                        btn.onclick = () => forceDownload(url, `Original_${sessionId}_${index+1}.jpg`, btn);
-
-                        div.appendChild(img);
-                        div.appendChild(btn);
-                        grid.appendChild(div);
+                        // Kalau klik salah satu foto di grid -> Masuk ke Preview Mode foto itu
+                        img.onclick = () => showPreview(url, 'image', `Original_${sessionId}_${index+1}`);
+                        
+                        const item = document.createElement('div');
+                        item.className = 'grid-item';
+                        item.appendChild(img);
+                        grid.appendChild(item);
                     });
                 } else {
                     document.getElementById('btn-raw-trigger').style.display = 'none';
                 }
 
                 loadingEl.style.display = 'none';
-                menuEl.style.display = 'block';
+                menuButtonsEl.style.display = 'block';
 
             } catch (err) {
                 loadingEl.innerText = "❌ " + err.message;
             }
         }
 
-        function openOriginals() {
-            document.getElementById('modal-originals').style.display = 'flex';
-        }
-        function closeOriginals() {
-            document.getElementById('modal-originals').style.display = 'none';
-        }
-        window.onclick = function(event) {
-            const modal = document.getElementById('modal-originals');
-            if (event.target == modal) modal.style.display = "none";
-        }
+        // Modal Logic
+        function openOriginalsGrid() { document.getElementById('modal-originals').style.display = 'flex'; }
+        function closeOriginalsGrid() { document.getElementById('modal-originals').style.display = 'none'; }
 
         loadData();
     </script>
