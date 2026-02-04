@@ -5,101 +5,291 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Framelo Booth</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
-        body { font-family: 'Space Mono', monospace; background: #f0f0f0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; text-align: center; }
-        .card { background: white; padding: 20px; border: 3px solid black; box-shadow: 8px 8px 0px #000; max-width: 400px; width: 100%; }
-        h1 { border-bottom: 3px solid black; padding-bottom: 10px; margin-top: 0; }
-        
-        /* Foto Utama */
-        img.main-preview { max-width: 100%; border: 2px solid black; margin: 20px auto; display: none; box-shadow: 4px 4px 0px #eee;}
-        
-        .btn { display: block; background: white; color: black; padding: 12px; margin-bottom: 10px; border: 2px solid black; text-decoration: none; font-weight: bold; text-transform: uppercase; cursor: pointer; }
-        .btn:hover { background: black; color: white; transform: translate(-2px, -2px); box-shadow: 4px 4px 0px #ccc; }
-        
-        /* Section Original Photos */
-        .originals-title { margin-top: 30px; border-top: 2px dashed #ccc; padding-top: 20px; font-weight: bold; display: none; }
-        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .grid-item { border: 2px solid #000; }
-        .grid-item img { width: 100%; height: auto; display: block; border-bottom: 2px solid #000; }
-        .btn-small { font-size: 10px; padding: 5px; width: 100%; border: none; background: black; color: white; text-align: center; display: block; text-decoration: none;}
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Space+Mono:wght@400;700&display=swap');
 
-        #status { font-weight: bold; color: #555; margin: 20px 0; }
-        #buttons { display: none; }
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify_content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 320px;
+            text-align: center;
+        }
+
+        .logo-text {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 42px;
+            font-weight: 600;
+            color: #3b82f6;
+            text-shadow: 2px 2px 0px #000;
+            margin-bottom: 5px;
+            line-height: 1;
+        }
+        .logo-sub {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 40px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .btn {
+            display: block;
+            background: white;
+            color: black;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 2px solid black;
+            box-shadow: 5px 5px 0px 0px #000;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            text-transform: capitalize;
+            cursor: pointer;
+            transition: all 0.1s;
+            border-radius: 8px;
+            width: 100%; /* Pastikan tombol lebar */
+            box-sizing: border-box; /* Biar padding ga ngerusak lebar */
+        }
+
+        .btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 3px 3px 0px 0px #000;
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 12px;
+            color: #000;
+            font-weight: bold;
+            line-height: 1.5;
+        }
+
+        /* --- MODAL --- */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border-radius: 10px;
+            text-align: center;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px; right: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .grid-item img {
+            width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        
+        .btn-download-small {
+            display: block;
+            background: black;
+            color: white;
+            font-size: 10px;
+            padding: 8px;
+            text-decoration: none;
+            margin-top: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #loading { font-size: 14px; color: #666; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.5; } }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>Framelo Booth</h1>
-        <p id="status">Mengambil data...</p>
+
+    <div class="container">
+        <div class="logo-text">Framelo<br>Booth</div>
+        <div class="logo-sub">CAPTURE MOMENTS</div>
+
+        <div id="loading">Memuat data...</div>
+
+        <div id="menu-buttons" style="display: none;">
+            
+            <button id="btn-pic" class="btn">Picture</button>
+
+            <button id="btn-raw-trigger" class="btn" onclick="openOriginals()">Original Image</button>
+
+            <button id="btn-gif" class="btn" style="display:none">GIF</button>
+
+            <button id="btn-vid" class="btn" style="display:none">Video</button>
         
-        <img id="preview" class="main-preview" alt="Foto">
-        
-        <div id="buttons">
-            <a id="btn-pic" class="btn" download>🖼️ Download Frame</a>
-            <a id="btn-gif" class="btn" download style="display:none">✨ Download GIF</a>
-            <a id="btn-vid" class="btn" download style="display:none">📹 Download Video</a>
         </div>
 
-        <div id="originals-section" style="display:none;">
-            <div class="originals-title">ORIGINAL PHOTOS</div>
-            <div class="grid-container" id="originals-grid">
-                </div>
+        <div class="footer">
+            Your soft files will be erased in 30 days,<br>don't forget to save it 😉
         </div>
+    </div>
 
-        <p style="font-size: 10px; color: #888; margin-top: 20px;">Files dihapus dalam 30 hari.</p>
+    <div id="modal-originals" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeOriginals()">&times;</span>
+            <h3>Original Photos</h3>
+            <div id="originals-grid" class="grid-container"></div>
+        </div>
     </div>
 
     <script>
         const params = new URLSearchParams(window.location.search);
         const sessionId = params.get('id');
-        const statusEl = document.getElementById('status');
-        const imgEl = document.getElementById('preview');
-        const btns = document.getElementById('buttons');
+
+        const loadingEl = document.getElementById('loading');
+        const menuEl = document.getElementById('menu-buttons');
+
+        // --- FUNGSI AUTO DOWNLOAD (The Magic) ---
+        async function forceDownload(url, filename, btnElement) {
+            const originalText = btnElement.innerText;
+            
+            // Ubah tulisan tombol jadi loading
+            btnElement.innerText = "⏳ Downloading...";
+            btnElement.style.pointerEvents = "none"; // Cegah klik ganda
+
+            try {
+                // 1. Fetch file data
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Network error");
+                
+                // 2. Buat Blob (File Virtual)
+                const blob = await response.blob();
+                const blobUrl = window.URL.createObjectURL(blob);
+
+                // 3. Buat link palsu & klik otomatis
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                // 4. Bersihkan
+                window.URL.revokeObjectURL(blobUrl);
+            } catch (e) {
+                // Fallback kalau fetch gagal (misal CORS error), buka tab baru
+                alert("Download otomatis gagal, membuka di tab baru...");
+                window.open(url, '_blank');
+            } finally {
+                // Balikin tombol seperti semula
+                btnElement.innerText = originalText;
+                btnElement.style.pointerEvents = "auto";
+            }
+        }
 
         async function loadData() {
-            if (!sessionId) { statusEl.innerText = "⚠️ Scan QR Code ulang."; return; }
+            if (!sessionId) { 
+                loadingEl.innerText = "⚠️ Silakan scan QR Code lagi.";
+                return; 
+            }
 
             try {
                 const response = await fetch(`/api/get?id=${sessionId}`);
                 const data = await response.json();
-                if (!response.ok) throw new Error("Data tidak ditemukan");
+                if (!response.ok) throw new Error("Data expired.");
 
-                // 1. Tampilkan Foto Frame Utama
+                // SETUP TOMBOL 1: PICTURE
                 if (data.photo_url) {
-                    imgEl.src = data.photo_url;
-                    document.getElementById('btn-pic').href = data.photo_url;
-                    imgEl.onload = () => {
-                        statusEl.style.display = 'none';
-                        imgEl.style.display = 'block';
-                        btns.style.display = 'block';
-                    }
+                    const btn = document.getElementById('btn-pic');
+                    btn.onclick = () => forceDownload(data.photo_url, `Framelo_${sessionId}.jpg`, btn);
                 }
+
+                // SETUP TOMBOL 2: GIF
                 if (data.gif_url) {
-                    const b = document.getElementById('btn-gif'); b.href = data.gif_url; b.style.display = 'block';
+                    const btn = document.getElementById('btn-gif');
+                    btn.style.display = 'block';
+                    btn.onclick = () => forceDownload(data.gif_url, `Framelo_${sessionId}.gif`, btn);
                 }
+
+                // SETUP TOMBOL 3: VIDEO
                 if (data.video_url) {
-                    const b = document.getElementById('btn-vid'); b.href = data.video_url; b.style.display = 'block';
+                    const btn = document.getElementById('btn-vid');
+                    btn.style.display = 'block';
+                    btn.onclick = () => forceDownload(data.video_url, `Framelo_${sessionId}.mp4`, btn);
                 }
 
-                // 2. Tampilkan Original Photos (LOOPING)
+                // SETUP MODAL: ORIGINAL PHOTOS
                 if (data.original_urls && Array.isArray(data.original_urls)) {
-                    document.getElementById('originals-section').style.display = 'block';
                     const grid = document.getElementById('originals-grid');
-                    
                     data.original_urls.forEach((url, index) => {
-                        // Bikin kotak HTML buat setiap foto
-                        const item = document.createElement('div');
-                        item.className = 'grid-item';
-                        item.innerHTML = `
-                            <img src="${url}" loading="lazy">
-                            <a href="${url}" class="btn-small" download>SAVE #${index+1}</a>
-                        `;
-                        grid.appendChild(item);
+                        const div = document.createElement('div');
+                        div.className = 'grid-item';
+                        
+                        // Gambar Preview
+                        const img = document.createElement('img');
+                        img.src = url;
+                        img.loading = "lazy";
+
+                        // Tombol Save Kecil
+                        const btn = document.createElement('button'); // Ubah jadi <button>
+                        btn.className = 'btn-download-small';
+                        btn.innerText = `Save #${index+1}`;
+                        // Pasang fungsi download
+                        btn.onclick = () => forceDownload(url, `Original_${sessionId}_${index+1}.jpg`, btn);
+
+                        div.appendChild(img);
+                        div.appendChild(btn);
+                        grid.appendChild(div);
                     });
+                } else {
+                    document.getElementById('btn-raw-trigger').style.display = 'none';
                 }
 
-            } catch (err) { statusEl.innerText = "❌ Error: " + err.message; }
+                loadingEl.style.display = 'none';
+                menuEl.style.display = 'block';
+
+            } catch (err) {
+                loadingEl.innerText = "❌ " + err.message;
+            }
         }
+
+        function openOriginals() {
+            document.getElementById('modal-originals').style.display = 'flex';
+        }
+        function closeOriginals() {
+            document.getElementById('modal-originals').style.display = 'none';
+        }
+        window.onclick = function(event) {
+            const modal = document.getElementById('modal-originals');
+            if (event.target == modal) modal.style.display = "none";
+        }
+
         loadData();
     </script>
 </body>
