@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   try {
     const { id, photo_url, gif_url, video_url, original_urls } = req.body;
 
-    // Update data berdasarkan ID
+    // Update data di database, ubah status jadi 'ready'
     const { error } = await supabase
       .from('sessions')
       .update({ 
@@ -19,7 +19,7 @@ export default async function handler(req, res) {
         gif_url, 
         video_url, 
         original_urls,
-        status: 'ready' // Tandai selesai!
+        status: 'ready' 
       })
       .eq('id', id);
 
